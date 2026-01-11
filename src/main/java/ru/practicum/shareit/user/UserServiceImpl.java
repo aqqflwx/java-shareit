@@ -60,9 +60,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Long userId) {
-        if (userRepository.findById(userId).isEmpty()) {
-            throw new NotFoundException("User not found");
-        }
         userRepository.deleteById(userId);
     }
 }

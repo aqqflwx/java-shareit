@@ -39,7 +39,7 @@ public class ItemRepository {
         }
         String searchText = text.toLowerCase();
         return items.values().stream()
-                .filter(item -> item.getAvailable())
+                .filter(Item::getAvailable)
                 .filter(item ->
                         item.getName().toLowerCase().contains(searchText) ||
                         item.getDescription().toLowerCase().contains(searchText))
