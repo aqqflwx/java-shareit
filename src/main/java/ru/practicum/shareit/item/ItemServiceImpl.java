@@ -73,35 +73,15 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found"));
 
-        ItemWithBookingsDto dto = new ItemWithBookingsDto();
-        dto.setId(item.getId());
-        dto.setName(item.getName());
-        dto.setDescription(item.getDescription());
-        dto.setAvailable(item.getAvailable());
+        ItemWithBookingsDto dto = ItemWithBookingsMapper.toDto(
+                item,
+                bookingRepository,
+                List.of()
+        );
 
-        // Добавляем lastBooking и nextBooking только для владельца
-        if (item.getOwner().getId().equals(userId)) {
-            LocalDateTime now = LocalDateTime.now();
-
-            List<Booking> lastBookings = bookingRepository.findByItemIdAndStartBeforeAndStatus(
-                    itemId, now, BookingStatus.APPROVED, Sort.by(Sort.Direction.DESC, "start"));
-            if (!lastBookings.isEmpty()) {
-                Booking lastBooking = lastBookings.getFirst();
-                ItemWithBookingsDto.BookingItemDto lastBookingDto = new ItemWithBookingsDto.BookingItemDto();
-                lastBookingDto.setId(lastBooking.getId());
-                lastBookingDto.setBookerId(lastBooking.getBooker().getId());
-                dto.setLastBooking(lastBookingDto);
-            }
-
-            List<Booking> nextBookings = bookingRepository.findByItemIdAndStartAfterAndStatus(
-                    itemId, now, BookingStatus.APPROVED, Sort.by(Sort.Direction.ASC, "start"));
-            if (!nextBookings.isEmpty()) {
-                Booking nextBooking = nextBookings.getFirst();
-                ItemWithBookingsDto.BookingItemDto nextBookingDto = new ItemWithBookingsDto.BookingItemDto();
-                nextBookingDto.setId(nextBooking.getId());
-                nextBookingDto.setBookerId(nextBooking.getBooker().getId());
-                dto.setNextBooking(nextBookingDto);
-            }
+        if (!item.getOwner().getId().equals(userId)) {
+            dto.setLastBooking(null);
+            dto.setNextBooking(null);
         }
 
         List<CommentDto> comments = commentRepository.findByItemId(itemId).stream()
@@ -111,6 +91,7 @@ public class ItemServiceImpl implements ItemService {
 
         return dto;
     }
+
 
     @Override
     public List<ItemWithBookingsDto> getItemsByOwner(Long userId) {
@@ -123,47 +104,7 @@ public class ItemServiceImpl implements ItemService {
         List<Comment> comments = commentRepository.findByItemIdIn(itemIds);
 
         return items.stream()
-                .map(item -> {
-                    ItemWithBookingsDto dto = new ItemWithBookingsDto();
-                    dto.setId(item.getId());
-                    dto.setName(item.getName());
-                    dto.setDescription(item.getDescription());
-                    dto.setAvailable(item.getAvailable());
-
-                    LocalDateTime now = LocalDateTime.now();
-                    Sort sort = Sort.by(Sort.Direction.DESC, "start");
-
-                    List<Booking> lastBookings = bookingRepository.findByItemIdAndStartBeforeAndStatus(
-                            item.getId(), now, BookingStatus.APPROVED, sort);
-                    if (!lastBookings.isEmpty()) {
-                        Booking lastBooking = lastBookings.get(0);
-                        ItemWithBookingsDto.BookingItemDto lastBookingDto =
-                                new ItemWithBookingsDto.BookingItemDto();
-                        lastBookingDto.setId(lastBooking.getId());
-                        lastBookingDto.setBookerId(lastBooking.getBooker().getId());
-                        dto.setLastBooking(lastBookingDto);
-                    }
-
-                    Sort sortAsc = Sort.by(Sort.Direction.ASC, "start");
-                    List<Booking> nextBookings = bookingRepository.findByItemIdAndStartAfterAndStatus(
-                            item.getId(), now, BookingStatus.APPROVED, sortAsc);
-                    if (!nextBookings.isEmpty()) {
-                        Booking nextBooking = nextBookings.get(0);
-                        ItemWithBookingsDto.BookingItemDto nextBookingDto =
-                                new ItemWithBookingsDto.BookingItemDto();
-                        nextBookingDto.setId(nextBooking.getId());
-                        nextBookingDto.setBookerId(nextBooking.getBooker().getId());
-                        dto.setNextBooking(nextBookingDto);
-                    }
-
-                    List<CommentDto> itemComments = comments.stream()
-                            .filter(comment -> comment.getItem().getId().equals(item.getId()))
-                            .map(CommentMapper::toCommentDto)
-                            .collect(Collectors.toList());
-                    dto.setComments(itemComments);
-
-                    return dto;
-                })
+                .map(item -> ItemWithBookingsMapper.toDto(item, bookingRepository, comments))
                 .collect(Collectors.toList());
     }
 

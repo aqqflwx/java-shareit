@@ -47,12 +47,7 @@ public class BookingServiceImpl implements BookingService {
             throw new IllegalArgumentException("End date must be after start date");
         }
 
-        Booking booking = new Booking();
-        booking.setStart(bookingCreateDto.getStart());
-        booking.setEnd(bookingCreateDto.getEnd());
-        booking.setItem(item);
-        booking.setBooker(booker);
-        booking.setStatus(BookingStatus.WAITING);
+        Booking booking = BookingMapper.toBooking(bookingCreateDto, item, booker);
 
         Booking savedBooking = bookingRepository.save(booking);
         return BookingMapper.toBookingDto(savedBooking);
