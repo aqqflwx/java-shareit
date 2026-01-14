@@ -16,32 +16,32 @@ public class BookingController {
 
     @PostMapping
     public BookingDto createBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                     @Valid @RequestBody BookingCreateDto bookingCreateDto) {
+                                    @Valid @RequestBody BookingCreateDto bookingCreateDto) {
         return bookingService.createBooking(userId, bookingCreateDto);
     }
 
     @PatchMapping("/{bookingId}")
     public BookingDto approveBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                      @PathVariable Long bookingId,
-                                      @RequestParam Boolean approved) {
+                                     @PathVariable Long bookingId,
+                                     @RequestParam Boolean approved) {
         return bookingService.approveBooking(userId, bookingId, approved);
     }
 
     @GetMapping("/{bookingId}")
     public BookingDto getBookingById(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                      @PathVariable Long bookingId) {
+                                     @PathVariable Long bookingId) {
         return bookingService.getBookingById(userId, bookingId);
     }
 
     @GetMapping
     public List<BookingDto> getBookingsByUser(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                               @RequestParam(defaultValue = "ALL") BookingState state) {
+                                              @RequestParam(defaultValue = "ALL") BookingState state) {
         return bookingService.getBookingsByUser(userId, state);
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getBookingsByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                @RequestParam(defaultValue = "ALL") BookingState state) {
+                                               @RequestParam(defaultValue = "ALL") BookingState state) {
         return bookingService.getBookingsByOwner(userId, state);
     }
 }

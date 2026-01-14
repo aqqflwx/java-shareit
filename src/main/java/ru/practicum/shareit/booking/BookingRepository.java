@@ -15,7 +15,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByBookerIdAndStartIsAfter(Long bookerId, LocalDateTime start, Sort sort);
 
     List<Booking> findByBookerIdAndStartIsBeforeAndEndIsAfter(Long bookerId, LocalDateTime start,
-                                                                LocalDateTime end, Sort sort);
+                                                              LocalDateTime end, Sort sort);
 
     List<Booking> findByBookerIdAndStatus(Long bookerId, BookingStatus status, Sort sort);
 
@@ -30,7 +30,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("select b from Booking b where b.item.owner.id = ?1 and b.start < ?2 and b.end > ?3")
     List<Booking> findByOwnerIdAndStartIsBeforeAndEndIsAfter(Long ownerId, LocalDateTime start,
-                                                               LocalDateTime end, Sort sort);
+                                                             LocalDateTime end, Sort sort);
 
     @Query("select b from Booking b where b.item.owner.id = ?1 and b.status = ?2")
     List<Booking> findByOwnerIdAndStatus(Long ownerId, BookingStatus status, Sort sort);
@@ -39,9 +39,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("select b from Booking b where b.item.id = ?1 and b.start < ?2 and b.status = ?3")
     List<Booking> findByItemIdAndStartBeforeAndStatus(Long itemId, LocalDateTime now,
-                                                        BookingStatus status, Sort sort);
+                                                      BookingStatus status, Sort sort);
 
     @Query("select b from Booking b where b.item.id = ?1 and b.start > ?2 and b.status = ?3")
     List<Booking> findByItemIdAndStartAfterAndStatus(Long itemId, LocalDateTime now,
-                                                       BookingStatus status, Sort sort);
+                                                     BookingStatus status, Sort sort);
 }
